@@ -1,32 +1,26 @@
+import View from "./View";
 import icons from "url:../../img/icons.svg";
 import { Fraction } from "fractional";
 
-class RecipeView {
+class RecipeView extends View {
   _parentElement = document.querySelector(".recipe");
-  _data;
+  _errorMessage = "We couldn't find that recipe. Please try another one!";
+  _message = "";
 
-  render(data) {
-    this._data = data;
-    const markup = this._generateMarkup();
-    this._clear();
-    this._parentElement.insertAdjacentHTML("afterbegin", markup);
+  addHandlerRender(handler) {
+    ["hashchange", "load"].forEach((ev) =>
+      window.addEventListener(ev, handler)
+    );
   }
 
-  _clear() {
-    this._parentElement.innerHTML = "";
+  addHandlerUpdateServings(handler) {
+    this._parentElement.addEventListener("click", function (e) {
+      const btn = e.target.closest(".btn--update-servings");
+      if (!btn) return;
+      const { updateTo } = btn.dataset;
+      if (+updateTo > 0) handler(+updateTo);
+    });
   }
-
-  renderSpinner = function () {
-    const markup = `
-    <div class="spinner">
-      <svg>
-        <use href="${icons}#icon-loader"></use>
-      </svg>
-    </div>
-  `;
-    this._parentElement.innerHTML = "";
-    this._parentElement.insertAdjacentHTML("afterbegin", markup);
-  };
 
   _generateMarkup() {
     return `
@@ -77,9 +71,6 @@ class RecipeView {
         </div>
 
         <div class="recipe__user-generated ${this._data.key ? "" : "hidden"}">
-          <svg>
-            <use href="${icons}#icon-user"></use>
-          </svg>
         </div>
         <button class="btn--round btn--bookmark">
           <svg class="">
